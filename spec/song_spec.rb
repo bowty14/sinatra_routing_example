@@ -1,17 +1,8 @@
-require 'rspec'
-require 'song'
-require 'album'
-require 'pry'
+require('spec_helper')
 
-describe '#Song' do
 
-  before(:each) do
-    Album.clear()
-    Song.clear()
-    @album = Album.new("Giant Steps", nil, nil, nil, nil)
-    @album.save()
-  end
 
+  
   describe('#==') do
     it("is the same song if it has the same attributes as another song") do
       song = Song.new("Naima", @album.id, nil)
@@ -36,7 +27,6 @@ describe '#Song' do
       song.save()
       song2 = Song.new("Naima", @album.id, nil)
       song2.save()
-      Song.clear()
       expect(Song.all).to(eq([]))
     end
   end
@@ -98,4 +88,3 @@ describe '#Song' do
       expect(song.album()).to(eq(@album))
     end
   end
-end

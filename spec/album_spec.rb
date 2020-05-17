@@ -1,12 +1,8 @@
-require 'rspec'
-require 'pry'
-require 'album'
+require('spec_helper')
 
 describe '#Album' do
 
-  before(:each) do
-    Album.clear()
-  end
+  
 
   describe('#save') do
     it("saves an album") do
@@ -30,7 +26,6 @@ describe '#Album' do
       album.save()
       album2 = Album.new("Blue", nil, nil, nil, nil)
       album2.save()
-      Album.clear()
       expect(Album.all).to(eq([]))
     end
   end
