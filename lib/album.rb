@@ -1,55 +1,58 @@
 class Album
-  attr_reader :id, :name
-  attr_accessor :name, :year, :genre, :artist
-  @@albums = {}
-  @@total_rows = 0
+  attr_accessor :name, :album_id
+  attr_reader :id
+  
 
-  def initialize(name, id, year, genre, artist)
-    @name = name
-    @id = id || @@total_rows += 1
-    @year = year
-    @genre = genre
-    @artist = artist
+  def initialize(attributes)
+    @name = attributes.fetch(:name)
+    @id = attributes.fetch(:id)
   end
 
   def self.all
-    @@albums.values()
+    returned_albums = DB.exec("SELECT * FROM albums;")
+    albums = []
+    returned_albums.each() do |album|
+      name = album.fetch("name")
+      id = album.fetch("id").to_i
+      albums.push(Album.new({:name => name, :id => id}))
+    end
+    albums
   end
 
   def self.clear
-    @@albums = {}
-    @@total_rows = 0
+    DB.exec("DELETE FROM albums *;")
   end
 
   def save
-    @@albums[self.id] = Album.new(self.name, self.id, self.year, self.genre, self.artist)
+    result = DB.exec("INSERT INTO albums (name) VALUES ('#{@name}') RETURNING id;")
+    @id = result.first().fetch("id").to_i
   end
 
   def self.find(id)
-    @@albums[id]
+    album = DB.exec("SELECT * FROM albums WHERE id = #{id};").first
+    name = album.fetch("name")
+    id = album.fetch("id").to_i
+    Album.new({:name => name, :id => id})
   end
 
   def update(name)
     @name = name
+    DB.exec("UPDATE albums SET name = '#{@name}' WHERE id = #{@id};")
   end
 
   def delete
-    @@albums.delete(self.id)
+    DB.exec("DELETE FROM albums WHERE id = #{@id};")
+    DB.exec("DELETE FROM songs WHERE album_id = #{@id};") # new code
   end
 
   def ==(album_to_compare)
     self.name() == album_to_compare.name()
   end
 
-  def self.search(name)
-    array = @@albums.values.select {|album| album.name == name}
-    return array
-  end
+  # def songs
+  #   Song.find_by_album(@id)
+  # end
 
-  def self.sort()
-    Album.all.sort {|a,b| a.name <=> b.name}
-    end  
-  
   def songs
     Song.find_by_album(self.id)
   end 

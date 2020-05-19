@@ -2,8 +2,14 @@ require('sinatra')
 require('sinatra/reloader')
 require('./lib/album')
 require('./lib/song')
+require('./lib/artist')
 require('pry')
+require("pg")
 also_reload('lib/**/*.rb')
+
+DB = PG.connect({:dbname => "record_store"})
+
+set :port, 5000
 
 get ('/test') do
   @something = "this is a variable"
@@ -26,15 +32,15 @@ get('/albums') do
   erb(:albums)  
 end
 
-post('/albums') do
+post('/albums') do ## Adds album to list of albums, cannot access in URL bar
   name = params[:album_name]
+  artist = params[:album_artist]
   year = params[:album_year]
   genre = params[:album_genre]
-  artist = params[:album_artist]
-  album = Album.new(name, nil, year, genre, artist)
+  in_inventory = params[:in_inventory]
+  album = Album.new({:name => name, :id => nil})
   album.save()
-  @albums = Album.all()
-  erb(:albums)
+  redirect to('/albums')
 end
 
 get('/albums/search') do
@@ -74,6 +80,7 @@ delete('/albums/:id') do
   erb(:albums)
 end
 
+
 # Get the detail for a specific song such as lyrics and songwriters.
 get('/albums/:id/songs/:song_id') do
   @song = Song.find(params[:song_id].to_i())
@@ -103,3 +110,48 @@ delete('/albums/:id/songs/:song_id') do
   @album = Album.find(params[:id].to_i())
   erb(:album)
 end
+
+
+
+get('/artists') do
+  @artists = Artist.all
+  erb(:artists)
+end 
+
+get('/artists/new') do
+  erb(:new_artist)
+end 
+
+get('/artists/:id') do
+  @artist = Artist.find(params[:id].to_i())
+  erb(:artist)
+end
+
+post('/artists') do
+  name = params[:artist_name]
+  artist = Artist.new({:name => name, :id => nil})
+  artist.save()
+  @artists = Artist.all()
+  erb(:artists)
+end
+
+patch('/artists/:id') do
+  @artist = Artist.find(params[:id].to_i())
+  @artist.update(params[:name])
+  @artists = Artist.all()
+  erb(:artists)
+end
+
+delete('/artists/:id') do
+  @artist = Artist.find(params[:id].to_i())
+  @artist.delete()
+  @artists = Artist.all()
+  erb(:artists)
+end
+
+# post('/artists/:id/albums') do
+#   @artist = Artist.find(params[:id].to_i())
+#   album = Album.new({:name => params[:album_name] , :id => nil})
+#   album.save()
+#   erb(:artist)
+# end

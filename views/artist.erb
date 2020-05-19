@@ -1,0 +1,26 @@
+<h4> Artist Name: <%= @artist.name %></h4>
+
+<h3>Artist Albums</h3>
+<% if @artist.albums %>
+  <ul>
+    <% @artist.albums.each do |album| %>
+      <li><a href = "/artists/ <%= @artist.id %>/albums/<%= album.id %>"><%= album.name %></a></li>
+      <% end %>
+      </ul>
+      <% else %>
+      <p> There are no albums for this artist </p>
+      <% end %>
+
+      <h4> Add a album: </h4>
+      <form action = "/artists/<%= @artist.id %>/albums" method = "post">
+        <div class = "form-group">
+          <label for = "album_name">Album Name:</label>
+          <input id = "album_name" name= "album_name" class= "form-control" type= "text"> 
+        </div>
+      <button type= "submit" class= "btn">Add album</button>
+      </form>
+
+      <form action="/artists/<%= @artist.id() %>" method="post">
+        <input name="_method" type="hidden" value="delete">
+        <button type="submit">Delete Artist</button>
+      </form>
